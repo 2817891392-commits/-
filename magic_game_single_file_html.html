@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>网页读心术</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: #fff;
+      background: radial-gradient(circle at top, #4f46e5 0%, #111827 42%, #030712 100%);
+      overflow-x: hidden;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      opacity: 0.45;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .star-dot {
+      position: absolute;
+      border-radius: 999px;
+      background: #fff;
+      animation: twinkle var(--duration) infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.25; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.75); }
+    }
+
+    .page {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 20px 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .layout {
+      width: 100%;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 920px) {
+      .layout {
+        grid-template-columns: 1fr 380px;
+      }
+      .page {
+        padding: 42px 20px;
+      }
+    }
+
+    .card {
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.10);
+      box-shadow: 0 26px 90px rgba(0,0,0,0.32);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 30px;
+      padding: 20px;
+    }
+
+    @media (min-width: 640px) {
+      .card { padding: 30px; }
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 26px;
+    }
+
+    .icon-box {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+      flex-shrink: 0;
+    }
+
+    .eyebrow {
+      margin: 0;
+      font-size: 12px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(224,231,255,0.82);
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 2px 0 0;
+      font-size: clamp(32px, 8vw, 54px);
+      line-height: 1.05;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin: 8px 0 0;
+      font-size: clamp(32px, 7vw, 46px);
+      line-height: 1.08;
+      font-weight: 950;
+      letter-spacing: -0.035em;
+    }
+
+    .panel {
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.20);
+      border-radius: 26px;
+      padding: 20px;
+    }
+
+    .tip {
+      color: #fef08a;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .desc {
+      margin: 0;
+      color: rgba(255,255,255,0.86);
+      font-size: 17px;
+      line-height: 1.85;
+    }
+
+    .actions {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    @media (min-width: 640px) {
+      .actions.two { grid-template-columns: 1fr 1fr; }
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      border-radius: 24px;
+      padding: 17px 18px;
+      font-size: 18px;
+      font-weight: 950;
+      transition: transform 0.16s ease, filter 0.16s ease, background 0.16s ease;
+    }
+
+    button:active { transform: scale(0.98); }
+
+    .primary {
+      background: #fff;
+      color: #020617;
+      box-shadow: 0 24px 80px rgba(255,255,255,0.16);
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .primary:hover { filter: brightness(1.03); }
+
+    .primary small {
+      display: block;
+      color: #4f46e5;
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .yes {
+      background: #6ee7b7;
+      color: #064e3b;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.22);
+    }
+
+    .ghost {
+      color: #fff;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+    }
+
+    .white-btn {
+      background: #fff;
+      color: #020617;
+    }
+
+    .topline {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .pill {
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.82);
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .number-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.24);
+      border-radius: 28px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 520px) {
+      .number-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+
+    @media (min-width: 760px) {
+      .number-grid { grid-template-columns: repeat(8, 1fr); }
+    }
+
+    .number-cell {
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.10);
+      border-radius: 16px;
+      padding: 11px 0;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 950;
+      box-shadow: inset 0 1px 10px rgba(255,255,255,0.04);
+      animation: rise 0.35s ease both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .screen {
+      animation: enter 0.36s ease both;
+    }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(14px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .thinking {
+      min-height: 440px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .spin-orb {
+      width: 92px;
+      height: 92px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.20);
+      background: rgba(255,255,255,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 46px;
+      margin-bottom: 22px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .muted {
+      color: rgba(255,255,255,0.68);
+      line-height: 1.7;
+    }
+
+    .result-box {
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.25);
+      border-radius: 30px;
+      padding: 30px 18px;
+      text-align: center;
+    }
+
+    .party {
+      width: 82px;
+      height: 82px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      background: rgba(255,255,255,0.15);
+      font-size: 42px;
+      animation: wobble 1.35s infinite ease-in-out;
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(5deg); }
+      75% { transform: rotate(-5deg); }
+    }
+
+    .big-number {
+      margin: 10px 0;
+      font-size: clamp(86px, 26vw, 144px);
+      line-height: 0.95;
+      letter-spacing: -0.08em;
+      font-weight: 950;
+    }
+
+    .secret {
+      display: none;
+      margin-top: 14px;
+      border: 1px solid rgba(254,240,138,0.25);
+      background: rgba(254,240,138,0.10);
+      color: rgba(255,251,235,0.92);
+      border-radius: 24px;
+      padding: 16px;
+      text-align: left;
+      line-height: 1.7;
+    }
+
+    .secret.show { display: block; animation: enter 0.28s ease both; }
+
+    .dashboard .brand { margin-bottom: 18px; }
+
+    .dash-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .dash-item {
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      opacity: 0.62;
+      border-radius: 20px;
+      padding: 13px;
+      transition: all 0.2s ease;
+    }
+
+    .dash-item.active {
+      border-color: rgba(255,255,255,0.45);
+      background: rgba(255,255,255,0.20);
+      opacity: 1;
+    }
+
+    .dash-item.yes-state {
+      border-color: rgba(167,243,208,0.42);
+      background: rgba(110,231,183,0.15);
+      opacity: 1;
+    }
+
+    .dash-item.no-state {
+      background: rgba(0,0,0,0.16);
+      opacity: 0.75;
+    }
+
+    .dash-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .dash-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .emoji {
+      font-size: 26px;
+      width: 34px;
+      text-align: center;
+    }
+
+    .dash-title {
+      margin: 0;
+      font-weight: 950;
+    }
+
+    .dash-sub {
+      margin: 2px 0 0;
+      color: rgba(255,255,255,0.56);
+      font-size: 13px;
+    }
+
+    .dash-status {
+      color: rgba(255,255,255,0.74);
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .code-box {
+      margin-top: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      border-radius: 24px;
+      padding: 16px;
+    }
+
+    .code-box p {
+      margin: 0;
+    }
+
+    .score {
+      margin: 8px 0 3px;
+      font-size: 42px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      overflow: hidden;
+    }
+
+    .confetti span {
+      position: absolute;
+      top: -40px;
+      width: var(--size);
+      height: var(--size);
+      left: var(--left);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.86);
+      box-shadow: 0 0 18px rgba(255,255,255,0.85);
+      animation: fall var(--duration) var(--delay) ease-out forwards;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+      12% { opacity: 1; }
+      82% { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(560deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  <div class="confetti" id="confetti"></div>
+
+  <main class="page">
+    <div class="layout">
+      <section class="card">
+        <div class="brand">
+          <div class="icon-box">🪄</div>
+          <div>
+            <p class="eyebrow">Mind Reading Web Magic</p>
+            <h1>网页读心术</h1>
+          </div>
+        </div>
+
+        <div id="game"></div>
+      </section>
+
+      <aside class="card dashboard">
+        <div class="brand">
+          <div class="icon-box">⭐</div>
+          <div>
+            <h2 style="font-size: 26px; margin: 0;">魔法仪表盘</h2>
+            <p class="dash-sub">你的答案会变成星座密码</p>
+          </div>
+        </div>
+
+        <div class="dash-list" id="dashList"></div>
+
+        <div class="code-box">
+          <p class="eyebrow">当前星座密码</p>
+          <p class="score" id="score">0</p>
+          <p class="muted" style="font-size: 14px; margin-top: 8px;">这个数字会随着你的回答变化。最后它会变成网页读出的结果。</p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const sets = [
+      { bit: 1, title: "福豆酱", emoji: "🐹" },
+      { bit: 2, title: "凑凑咪", emoji: "🐱" },
+      { bit: 4, title: "老北鸡", emoji: "🐓" },
+      { bit: 8, title: "熊大熊二", emoji: "🐻" },
+      { bit: 16, title: "鸥哥", emoji: "🦤" },
+      { bit: 32, title: "坏鱼", emoji: "🐟" }
+    ];
+
+    let started = false;
+    let step = 0;
+    let answers = [];
+    let revealed = false;
+    let showSecret = false;
+
+    const game = document.getElementById("game");
+    const dashList = document.getElementById("dashList");
+    const score = document.getElementById("score");
+    const confetti = document.getElementById("confetti");
+    const stars = document.getElementById("stars");
+
+    function numbersFor(bit) {
+      return Array.from({ length: 63 }, (_, i) => i + 1).filter(n => (n & bit) !== 0);
+    }
+
+    function guessedNumber() {
+      return answers.reduce((sum, answer, i) => sum + (answer ? sets[i].bit : 0), 0);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderStars() {
+      stars.innerHTML = "";
+      for (let i = 0; i < 42; i++) {
+        const dot = document.createElement("span");
+        const size = 2 + (i % 4);
+        dot.className = "star-dot";
+        dot.style.width = size + "px";
+        dot.style.height = size + "px";
+        dot.style.left = ((i * 17) % 100) + "%";
+        dot.style.top = ((i * 29) % 100) + "%";
+        dot.style.setProperty("--duration", (2 + (i % 5)) + "s");
+        dot.style.animationDelay = (i * 0.06) + "s";
+        stars.appendChild(dot);
+      }
+    }
+
+    function renderDashboard() {
+      dashList.innerHTML = sets.map((s, i) => {
+        const answered = i < answers.length;
+        const active = started && !revealed && i === step;
+        let state = "";
+        if (active) state = "active";
+        else if (answered && answers[i]) state = "yes-state";
+        else if (answered) state = "no-state";
+
+        const status = answered ? (answers[i] ? "+" + s.bit : "跳过") : (active ? "当前" : "未问");
+
+        return `
+          <div class="dash-item ${state}">
+            <div class="dash-row">
+              <div class="dash-left">
+                <div class="emoji">${s.emoji}</div>
+                <div>
+                  <p class="dash-title">${escapeHtml(s.title)}</p>
+                  <p class="dash-sub">魔法值 ${s.bit}</p>
+                </div>
+              </div>
+              <div class="dash-status">${status}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+      score.textContent = guessedNumber();
+    }
+
+    function renderIntro() {
+      game.innerHTML = `
+        <div class="screen">
+          <div class="panel">
+            <div class="tip">✨ <span>玩法很简单，但请不要告诉网页你想的数字。</span></div>
+            <p class="desc">
+              请在心里默想一个 <b>1 到 63</b> 之间的整数。接下来你会看到 6 张魔法数字牌，
+              只需要回答：你的数字是否出现在牌面上。最后，网页会尝试读出你的数字。
+            </p>
+          </div>
+          <div class="actions">
+            <button class="primary" onclick="startGame()">
+              <span><small>开始魔术</small>我已经想好数字了</span>
+              <span style="font-size: 34px;">👁️</span>
+            </button>
+          </div>
+        </div>
+      `;
+      renderDashboard();
+    }
+
+    function renderQuestion() {
+      const current = sets[step];
+      const nums = numbersFor(current.bit);
+      game.innerHTML = `
+        <div class="screen">
+          <div class="topline">
+            <div>
+              <p class="eyebrow">第 ${step + 1} / 6 张魔法牌</p>
+              <h2><span style="margin-right: 8px;">${current.emoji}</span>${escapeHtml(current.title)}</h2>
+            </div>
+            <div class="pill">只需回答“有”或“没有”</div>
+          </div>
+
+          <div class="number-grid">
+            ${nums.map((n, i) => `<div class="number-cell" style="animation-delay:${(i % 12) * 0.012}s">${n}</div>`).join("")}
+          </div>
+
+          <div class="actions two">
+            <button class="yes" onclick="answer(true)">有，我看到了</button>
+            <button class="ghost" onclick="answer(false)">没有，不在这张牌上</button>
+          </div>
+        </div>
+      `;
+      renderDashboard();
+    }
+
+    function renderThinking() {
+      game.innerHTML = `
+        <div class="screen thinking">
+          <div class="spin-orb">✨</div>
+          <h2>正在读取你的脑电波……</h2>
+          <p class="muted">水晶球正在把你的 6 次回答拼成一个神秘坐标。</p>
+        </div>
+      `;
+      renderDashboard();
+    }
+
+    function renderResult() {
+      const number = guessedNumber();
+      game.innerHTML = `
+        <div class="screen">
+          <div class="result-box">
+            <div class="party">🎉</div>
+            <p class="eyebrow">我猜到了</p>
+            <div class="big-number">${number || "?"}</div>
+            <p class="desc" style="text-align:center;">
+              ${number ? "这就是你刚刚在心里默想的数字。" : "你可能选择了 0 或没有选择 1 到 63 之间的数字，再试一次会更准。"}
+            </p>
+          </div>
+
+          <div class="actions two">
+            <button class="white-btn" onclick="resetGame()">↻ 再玩一次</button>
+            <button class="ghost" onclick="toggleSecret()">${showSecret ? "隐藏机关" : "揭秘机关"}</button>
+          </div>
+
+          <div class="secret ${showSecret ? "show" : ""}">
+            <b>魔术原理：</b><br />
+            冷静下来用心去贴近宝宝的心，不要被情绪左右，才能读到老婆真正的心声，我知道错惹老婆55555
+          </div>
+        </div>
+      `;
+      if (number > 0) throwConfetti();
+      renderDashboard();
+    }
+
+    function startGame() {
+      started = true;
+      step = 0;
+      answers = [];
+      revealed = false;
+      showSecret = false;
+      renderQuestion();
+    }
+
+    function answer(yes) {
+      answers.push(yes);
+      if (step >= sets.length - 1) {
+        step = sets.length;
+        renderThinking();
+        setTimeout(() => {
+          revealed = true;
+          renderResult();
+        }, 650);
+      } else {
+        step += 1;
+        renderQuestion();
+      }
+    }
+
+    function resetGame() {
+      started = false;
+      step = 0;
+      answers = [];
+      revealed = false;
+      showSecret = false;
+      confetti.innerHTML = "";
+      renderIntro();
+    }
+
+    function toggleSecret() {
+      showSecret = !showSecret;
+      renderResult();
+    }
+
+    function throwConfetti() {
+      confetti.innerHTML = "";
+      for (let i = 0; i < 44; i++) {
+        const piece = document.createElement("span");
+        piece.style.setProperty("--left", Math.random() * 100 + "%");
+        piece.style.setProperty("--size", (6 + Math.random() * 8) + "px");
+        piece.style.setProperty("--duration", (1.7 + Math.random() * 1.5) + "s");
+        piece.style.setProperty("--delay", Math.random() * 0.35 + "s");
+        confetti.appendChild(piece);
+      }
+      setTimeout(() => confetti.innerHTML = "", 3600);
+    }
+
+    renderStars();
+    renderIntro();
+  </script>
+</body>
+</html>
